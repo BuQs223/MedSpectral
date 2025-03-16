@@ -14,24 +14,18 @@ export function DashboardOverview() {
   const [stats, setStats] = useState({
     totalPatients: 0,
     pendingRequests: 0,
-    upcomingAppointments: 12,
+    upcomingAppointments: 0,
     unreadMessages: 7,
     patientGrowth: 8.5,
     appointmentGrowth: 12.3,
     completionRate: 94.7,
     upcomingAppointmentsList: [
-      { id: 1, patient: "John Doe", time: "Today, 10:00 AM", type: "Check-up" },
-      { id: 2, patient: "Emma Thompson", time: "Today, 2:30 PM", type: "Follow-up" },
-      { id: 3, patient: "Michael Brown", time: "Tomorrow, 9:15 AM", type: "Consultation" },
-      { id: 4, patient: "Sophia Garcia", time: "Tomorrow, 11:45 AM", type: "Check-up" },
-      { id: 5, patient: "David Wilson", time: "Jun 25, 3:00 PM", type: "Follow-up" },
+      { id: 1, patient: "", time: "", type: "" },
+      
     ],
     recentActivity: [
       { id: 1, type: "patient_request", patient: "Lisa Martinez", status: "pending", time: "10 minutes ago" },
-      { id: 2, type: "medical_record", patient: "John Doe", status: "updated", time: "25 minutes ago" },
-      { id: 3, type: "appointment", patient: "Emma Thompson", status: "completed", time: "1 hour ago" },
-      { id: 4, type: "message", patient: "Michael Brown", status: "received", time: "2 hours ago" },
-      { id: 5, type: "patient_request", patient: "James Johnson", status: "accepted", time: "3 hours ago" },
+      
     ],
   })
 
@@ -52,41 +46,113 @@ export function DashboardOverview() {
         console.error("No authenticated user found")
         return
       }
-
+  
       // Get doctor ID
       const { data: doctorData, error: doctorError } = await supabase
         .from('doctor')
         .select('id')
         .eq('user_id', user.id)
         .single()
-
+  
       if (doctorError || !doctorData) {
         console.error("Error fetching doctor data:", doctorError)
         return
       }
-
+  
       const doctorId = doctorData.id
-      console.log("@docid" , doctorId)
+      console.log("@docid", doctorId)
+      
       // Fetch connections for this doctor
       const { data: connections, error: connectionsError } = await supabase
         .from('connection')
         .select('*')
         .eq('doctor_id', doctorId)
-
+  
       if (connectionsError) {
         console.error("Error fetching connections:", connectionsError)
         return
       }
-
+      
+      // Fetch upcoming appointments
+      const { data: appointments, error: appointmentsError } = await supabase
+        .from('appointment')
+        .select('*')
+        .eq('doctor_id', doctorId)
+      
+      if (appointmentsError) {
+        console.error("Error fetching appointments:", appointmentsError)
+        return
+      }
+      
       // Count valid connections (patients) and pending requests
       const validConnections = connections.filter(conn => conn.status === 'accepted')
       const pendingConnections = connections.filter(conn => conn.status === 'pending')
-
+      const validAppointments = appointments.filter(appt => appt.status === 'scheduled')
+  
+      // Create an array of all user_ids from appointments
+      const userIds = appointments.map(appointment => appointment.user_id)
+      
+      // Fetch user information for all patients in one query
+      const { data: patients, error: patientsError } = await supabase
+        .from('user')
+        .select('supabase_id, first_name, last_name')
+        .in('supabase_id', userIds)
+      console.log(patients)
+      if (patientsError) {
+        console.error("Error fetching patient information:", patientsError)
+        return
+      }
+      
+      // Create a map of user_id to patient name for quick lookup
+      // Define the type for the patient map
+      interface PatientInfo {
+        [key: string]: string;
+      }
+      
+      const patientMap: PatientInfo = {}
+      
+      if (patients) {
+        patients.forEach(patient => {
+          patientMap[patient.supabase_id] = `${patient.first_name} ${patient.last_name}`
+        })
+      }
+      console.log(patientMap)
+      // Format the upcoming appointments list
+      const formattedAppointments = appointments.map(appointment => {
+        const appointmentDate = new Date(appointment.appointment_date)
+        
+        // Format the date/time
+        let timeString
+        const today = new Date()
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        
+        if (appointmentDate.toDateString() === today.toDateString()) {
+          timeString = `Today, ${appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        } else if (appointmentDate.toDateString() === tomorrow.toDateString()) {
+          timeString = `Tomorrow, ${appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        } else {
+          timeString = `${appointmentDate.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        }
+        console.log(appointment.user_id)
+        // Get patient name from the map, or use a fallback if not found
+        const patientName = patientMap[appointment.user_id] || "Unknown Patient"
+        
+        return {
+          id: appointment.id,
+          patient: patientName,
+          time: timeString,
+          type: appointment.appointment_type || "Consultation" // Fallback if type is missing
+        }
+      })
+  
       // Update stats with real data
       setStats(prevStats => ({
         ...prevStats,
         totalPatients: validConnections.length,
-        pendingRequests: pendingConnections.length
+        pendingRequests: pendingConnections.length,
+        upcomingAppointments: validAppointments.length,
+        upcomingAppointmentsList: formattedAppointments
       }))
     } catch (error) {
       console.error("Error in fetchDoctorDashboardData:", error)
@@ -94,10 +160,13 @@ export function DashboardOverview() {
       setLoading(false)
     }
   }
+  
+  
+  
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -112,11 +181,7 @@ export function DashboardOverview() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{stats.totalPatients}</div>
-                <div className="flex items-center text-xs text-muted-foreground mt-1">
-                  <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
-                  <span className="text-green-500 font-medium">{stats.patientGrowth}%</span>
-                  <span className="ml-1">from last month</span>
-                </div>
+                
               </>
             )}
           </CardContent>
@@ -159,37 +224,14 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.upcomingAppointments}</div>
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
-              <span className="text-green-500 font-medium">{stats.appointmentGrowth}%</span>
-              <span className="ml-1">from last week</span>
-            </div>
+            
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.unreadMessages}</div>
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <span>From patients</span>
-            </div>
-          </CardContent>
-          <CardFooter className="p-2">
-            <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/doctor/messages">
-                View Messages
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
+        
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <Card className="border-gray-200 shadow-sm lg:col-span-4">
           <CardHeader>
             <CardTitle>Upcoming Appointments</CardTitle>
@@ -228,52 +270,7 @@ export function DashboardOverview() {
           </CardFooter>
         </Card>
 
-        <Card className="border-gray-200 shadow-sm lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Practice Overview</CardTitle>
-            <CardDescription>Key metrics and performance</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium">Appointment Completion Rate</div>
-                <div className="text-sm text-muted-foreground">{stats.completionRate}%</div>
-              </div>
-              <Progress value={stats.completionRate} className="h-2" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Patient Satisfaction</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">4.8/5.0</div>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    Excellent
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Response Time</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">2.3 hours</div>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    Good
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <Button variant="outline" className="w-full border-gray-200" asChild>
-                <Link href="/doctor/analytics">
-                  <ClipboardList className="mr-2 h-4 w-4" />
-                  View Detailed Analytics
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   )

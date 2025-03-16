@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarView } from "@/components/scheduling/calendar-view"
-import { AppointmentList } from "@/components/scheduling/appointment-list"
-import { DoctorAvailabilityManager } from "@/components/scheduling/doctor-availability-manager"
+import { CalendarView } from "@/app/components/scheduling/calendar-view"
+import { AppointmentList } from "@/app/components/scheduling/appointment-list"
+import { DoctorAvailabilityManager } from "@/app/components/scheduling/doctor-availability-manager"
 
 export default function SchedulingPage() {
   return (

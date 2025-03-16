@@ -261,7 +261,7 @@ export function PatientManagement() {
                   <thead className="bg-gray-50">
                     <tr className="border-b border-gray-200 text-left">
                       <th className="h-12 px-4 text-left font-medium text-gray-500">Name</th>
-                      <th className="h-12 px-4 text-left font-medium text-gray-500 hidden md:table-cell">Age/Gender</th>
+                      <th className="h-12 px-4 text-left font-medium text-gray-500 hidden md:table-cell">Gender</th>
                       <th className="h-12 px-4 text-left font-medium text-gray-500 hidden lg:table-cell">Last Visit</th>
                       <th className="h-12 px-4 text-left font-medium text-gray-500 hidden lg:table-cell">
                         Medical Conditions
@@ -296,7 +296,7 @@ export function PatientManagement() {
                           </div>
                         </td>
                         <td className="p-4 hidden md:table-cell">
-                          {patient.age !== null ? patient.age : 'N/A'} / {patient.gender}
+                           {patient.gender}
                         </td>
                         <td className="p-4 hidden lg:table-cell">
                           {patient.lastVisit 

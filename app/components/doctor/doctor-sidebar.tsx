@@ -54,7 +54,7 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
       icon: UserPlus,
       href: "/doctor?tab=requests",
       active: pathname === "/doctor" && currentTab === "requests",
-      notification: 5,
+      notification: 0,
     },
    
     {
@@ -62,23 +62,11 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
       icon: Calendar,
       href: "/doctor/scheduling",
       active: pathname === "/doctor/scheduling",
-      notification: 3,
-    },
-    {
-      label: "Messages",
-      icon: MessageSquare,
-      href: "/doctor/messages",
-      active: pathname === "/doctor/messages",
-      notification: 7,
-    },
-   
-    {
-      label: "Settings",
-      icon: Settings,
-      href: "/doctor/settings",
-      active: pathname === "/doctor/settings",
       notification: 0,
     },
+   
+   
+    
   ]
 
   return (

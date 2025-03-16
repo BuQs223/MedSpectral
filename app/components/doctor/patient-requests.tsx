@@ -49,35 +49,45 @@ export function PatientRequests() {
   const getRequests = async () => {
     try {
       setIsLoading(true);
-      
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data: docData, error: docDataError } = await supabase
+        .from('doctor')
+        .select("id") // Specify the column you want to fetch
+        .eq("user_id", user?.id); // Filter by user_id
+      console.log("@@@@@docdata", docData)
+      if (!docData || docData.length === 0) {
+        console.error("No doctor found for the given user_id.");
+        return;
+      }
+      const doctorId = docData[0]?.id;
       // Step 1: Get connections for this doctor
       const { data: connections, error: connectionsError } = await supabase
         .from('connection')
         .select("*")
         .eq("status", "pending")
-        .eq("doctor_id", "8e4cd7e3-db41-4f1a-bafe-77bcb7efe6a4");
-      
+        .eq("doctor_id", doctorId);
+
       if (connectionsError) throw connectionsError;
       if (!connections || connections.length === 0) {
         setPatientRequests([]);
         return;
       }
-      console.log("con",connections)
+      console.log("con", connections)
       // Step 2: Get user data for each patient
       const patientIds = connections.map(conn => conn.patient_id);
-      console.log("patientIDS",patientIds)
+      console.log("patientIDS", patientIds)
       const { data: userData, error: userError } = await supabase
         .from('user')
         .select("*")
         .in("supabase_id", patientIds);
-      console.log("@userDATA" , userData)
+      console.log("@userDATA", userData)
       if (userError) throw userError;
-      
+
       // Step 3: Combine the data
       const formattedRequests: PatientRequest[] = connections.map(connection => {
         // Find the matching user data
         const user = userData?.find(u => u.supabase_id === connection.patient_id) || {};
-        console.log("@@@@@@@USEZSR",user)
+        console.log("@@@@@@@USEZSR", user)
         return {
           id: connection.id,
           name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || "Unknown Patient",
@@ -92,7 +102,7 @@ export function PatientRequests() {
           patientId: connection.patient_id,
         };
       });
-      
+
       setPatientRequests(formattedRequests);
     } catch (err) {
       console.error("Error fetching requests:", err);
@@ -100,7 +110,7 @@ export function PatientRequests() {
       setIsLoading(false);
     }
   };
-  
+
   const filteredRequests = patientRequests.filter((request) => {
     return (
       request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,20 +122,20 @@ export function PatientRequests() {
     try {
       const { data, error } = await supabase
         .from('connection')
-        .update({ 
+        .update({
           status: 'accepted',
           response_date: new Date().toISOString()
         })
         .eq('id', id)
         .select();
-      
+
       if (error) throw error;
-      
+
       // Update the local state to reflect the change
-      setPatientRequests(prevRequests => 
+      setPatientRequests(prevRequests =>
         prevRequests.filter(request => request.id !== id)
       );
-      
+
       setViewDialogOpen(false);
     } catch (err) {
       console.error("Error accepting request:", err);
@@ -136,21 +146,21 @@ export function PatientRequests() {
     try {
       const { data, error } = await supabase
         .from('connection')
-        .update({ 
+        .update({
           status: 'declined',
           rejection_reason: rejectionReason,
           response_date: new Date().toISOString()
         })
         .eq('id', id)
         .select();
-      
+
       if (error) throw error;
-      
+
       // Update the local state to reflect the change
-      setPatientRequests(prevRequests => 
+      setPatientRequests(prevRequests =>
         prevRequests.filter(request => request.id !== id)
       );
-      
+
       setRejectionReason("");
       setRejectDialogOpen(false);
     } catch (err) {
@@ -311,18 +321,18 @@ export function PatientRequests() {
                   <div className="flex flex-wrap gap-2 mt-2">
                     {typeof selectedRequest.medicalConditions === "string"
                       ? selectedRequest.medicalConditions
-                          .split(",")
-                          .map((condition, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="bg-blue-50 text-blue-700 border-blue-200"
-                            >
-                              {condition.trim()}
-                            </Badge>
-                          ))
+                        .split(",")
+                        .map((condition, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="bg-blue-50 text-blue-700 border-blue-200"
+                          >
+                            {condition.trim()}
+                          </Badge>
+                        ))
                       : Array.isArray(selectedRequest.medicalConditions)
-                      ? selectedRequest.medicalConditions.map((condition, index) => (
+                        ? selectedRequest.medicalConditions.map((condition, index) => (
                           <Badge
                             key={index}
                             variant="outline"
@@ -331,7 +341,7 @@ export function PatientRequests() {
                             {condition}
                           </Badge>
                         ))
-                      : null}
+                        : null}
                   </div>
                 </div>
 

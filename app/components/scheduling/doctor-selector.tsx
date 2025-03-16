@@ -9,17 +9,25 @@ import { Badge } from "@/components/ui/badge"
 import { Search, MapPin, Star, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { createClient } from "@supabase/supabase-js"
+
+// Initialize Supabase client - you'll need to add your Supabase URL and anon key
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+)
 
 interface Doctor {
-  id: string
-  name: string
-  specialty: string
-  location: string
-  rating: number
-  reviewCount: number
-  imageUrl?: string
-  nextAvailable: string
-  availableToday: boolean
+  id: string;
+  user_id: string | null;
+  specialization_id: string | null;
+  hospital: string | null;
+  status: string | null;
+  rating: number | null;
+  reviews: string | null;
+  speciality: string | null;
+  name: string | null;
+  image?: string;
 }
 
 interface DoctorSelectorProps {
@@ -35,84 +43,35 @@ export function DoctorSelector({ onSelectDoctor, selectedDoctorId }: DoctorSelec
   const [specialtyFilter, setSpecialtyFilter] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch doctors
+  // Fetch doctors from Supabase
   useEffect(() => {
     const fetchDoctors = async () => {
       setIsLoading(true)
       try {
-        // In a real app, this would be an API call
-        // For demo purposes, we'll use mock data
-        const mockDoctors: Doctor[] = [
-          {
-            id: "1",
-            name: "Dr. Sarah Johnson",
-            specialty: "Cardiology",
-            location: "New York Medical Center",
-            rating: 4.8,
-            reviewCount: 124,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "Today",
-            availableToday: true,
-          },
-          {
-            id: "2",
-            name: "Dr. Michael Chen",
-            specialty: "Dermatology",
-            location: "Westside Health Clinic",
-            rating: 4.7,
-            reviewCount: 98,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "Tomorrow",
-            availableToday: false,
-          },
-          {
-            id: "3",
-            name: "Dr. Emily Rodriguez",
-            specialty: "Pediatrics",
-            location: "Children's Medical Group",
-            rating: 4.9,
-            reviewCount: 156,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "Today",
-            availableToday: true,
-          },
-          {
-            id: "4",
-            name: "Dr. James Wilson",
-            specialty: "Orthopedics",
-            location: "Sports Medicine Center",
-            rating: 4.6,
-            reviewCount: 87,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "In 2 days",
-            availableToday: false,
-          },
-          {
-            id: "5",
-            name: "Dr. Lisa Patel",
-            specialty: "Neurology",
-            location: "Neurological Institute",
-            rating: 4.8,
-            reviewCount: 112,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "Today",
-            availableToday: true,
-          },
-          {
-            id: "6",
-            name: "Dr. Robert Kim",
-            specialty: "Family Medicine",
-            location: "Community Health Partners",
-            rating: 4.5,
-            reviewCount: 143,
-            imageUrl: "/placeholder.svg?height=100&width=100",
-            nextAvailable: "Tomorrow",
-            availableToday: false,
-          },
-        ]
-
-        setDoctors(mockDoctors)
-        setFilteredDoctors(mockDoctors)
+        const { data, error } = await supabase
+          .from('doctor')
+          .select('*')
+          .eq('status', 'approved') // Only fetch approved doctors
+        
+        if (error) {
+          console.error("Error fetching doctors:", error)
+          toast({
+            title: "Error",
+            description: "Failed to load doctors. Please try again.",
+            variant: "destructive",
+          })
+          return
+        }
+        
+        // Add a default image for doctors without one
+        const doctorsWithImages = data.map(doctor => ({
+          ...doctor,
+          image: doctor.image || "/placeholder.svg?height=100&width=100" // Default placeholder image
+        }))
+        
+        console.log(data)
+        setDoctors(doctorsWithImages)
+        setFilteredDoctors(doctorsWithImages)
       } catch (error) {
         console.error("Error fetching doctors:", error)
         toast({
@@ -136,21 +95,27 @@ export function DoctorSelector({ onSelectDoctor, selectedDoctorId }: DoctorSelec
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(
         (doctor) =>
-          doctor.name.toLowerCase().includes(term) ||
-          doctor.specialty.toLowerCase().includes(term) ||
-          doctor.location.toLowerCase().includes(term),
+          (doctor.name && doctor.name.toLowerCase().includes(term)) ||
+          (doctor.speciality && doctor.speciality.toLowerCase().includes(term)) ||
+          (doctor.hospital && doctor.hospital.toLowerCase().includes(term))
       )
     }
 
     if (specialtyFilter) {
-      filtered = filtered.filter((doctor) => doctor.specialty === specialtyFilter)
+      filtered = filtered.filter((doctor) => doctor.speciality === specialtyFilter)
     }
 
     setFilteredDoctors(filtered)
   }, [doctors, searchTerm, specialtyFilter])
 
   // Get unique specialties for filtering
-  const specialties = Array.from(new Set(doctors.map((doctor) => doctor.specialty)))
+  const specialties = Array.from(
+    new Set(
+      doctors
+        .map((doctor) => doctor.speciality)
+        .filter((specialty): specialty is string => specialty !== null)
+    )
+  )
 
   return (
     <div className="space-y-6">
@@ -159,7 +124,7 @@ export function DoctorSelector({ onSelectDoctor, selectedDoctorId }: DoctorSelec
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search by doctor name, specialty, or location..."
+            placeholder="Search by doctor name, specialty, or hospital..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -209,42 +174,41 @@ export function DoctorSelector({ onSelectDoctor, selectedDoctorId }: DoctorSelec
           {filteredDoctors.map((doctor) => (
             <Card
               key={doctor.id}
-              className={`transition-all ${selectedDoctorId === doctor.id ? "border-primary ring-1 ring-primary" : "hover:border-primary/50"}`}
+              className={`transition-all ${
+                selectedDoctorId === doctor.id
+                  ? "border-primary ring-1 ring-primary"
+                  : "hover:border-primary/50"
+              }`}
             >
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   <Avatar className="h-16 w-16 border">
-                    <AvatarImage src={doctor.imageUrl} alt={doctor.name} />
+                    <AvatarImage src={doctor.image} alt={doctor.name || ""} />
                     <AvatarFallback>
                       {doctor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                        ? doctor.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                        : "DR"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2 flex-grow">
                     <div>
-                      <h3 className="font-medium text-lg">{doctor.name}</h3>
-                      <p className="text-muted-foreground">{doctor.specialty}</p>
+                      <h3 className="font-medium text-lg">{doctor.name || "Unknown Doctor"}</h3>
+                      <p className="text-muted-foreground">{doctor.speciality || "General"}</p>
                     </div>
                     <div className="flex items-center text-sm">
                       <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                      <span className="text-muted-foreground">{doctor.location}</span>
+                      <span className="text-muted-foreground">
+                        {doctor.hospital || "Not specified"}
+                      </span>
                     </div>
                     <div className="flex items-center text-sm">
                       <Star className="h-3.5 w-3.5 mr-1 text-amber-500" />
                       <span>
-                        {doctor.rating} ({doctor.reviewCount} reviews)
+                        {doctor.rating || "N/A"} ({doctor.reviews || "0"} reviews)
                       </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <Clock className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                      <span className="text-muted-foreground">Next available: {doctor.nextAvailable}</span>
-                      {doctor.availableToday && (
-                        <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
-                          Available Today
-                        </Badge>
-                      )}
                     </div>
                   </div>
                   <Button
@@ -273,4 +237,3 @@ export function DoctorSelector({ onSelectDoctor, selectedDoctorId }: DoctorSelec
     </div>
   )
 }
-

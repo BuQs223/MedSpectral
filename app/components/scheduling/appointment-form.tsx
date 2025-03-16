@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, Calendar, Clock } from "lucide-react"
+import { toast } from "@/components/ui/use-toast" // Assuming you have a toast component
+import { supabase } from "@/utils/supabase"
 
 // Define the form schema
 const appointmentFormSchema = z.object({
@@ -68,7 +70,67 @@ export function AppointmentForm({ doctorId, date, timeSlot, onSubmit, onBack }: 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
     try {
+      // Get the current user
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !userData.user) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to schedule an appointment",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Format the date and time for the database
+      const appointmentDateTime = new Date(date)
+      const [hours, minutes] = timeSlot.split(':')
+      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+
+      // Create the appointment record in Supabase
+      const { data: appointmentData, error: appointmentError } = await supabase
+        .from('appointment')
+        .insert({
+          patient_id: userData.user.id,
+          user_id: userData.user.id,
+          doctor_id: doctorId,
+          appointment_date: appointmentDateTime.toISOString(),
+          reason: data.reason,
+          type: data.appointmentType,
+          notes: data.description || null,
+          is_first_visit: data.isFirstVisit,
+          has_insurance: data.hasInsurance,
+          insurance_provider: data.hasInsurance ? data.insuranceProvider : null,
+          insurance_number: data.hasInsurance ? data.insuranceNumber : null,
+          status: 'scheduled', // Default status
+          created_at: new Date().toISOString(),
+        })
+        .select()
+
+      if (appointmentError) {
+        console.error("Error creating appointment:", appointmentError)
+        toast({
+          title: "Error",
+          description: "Failed to schedule appointment. Please try again.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Call the original onSubmit function with the form data
       await onSubmit(data)
+      
+      toast({
+        title: "Success",
+        description: "Your appointment has been scheduled successfully!",
+      })
+    } catch (error) {
+      console.error("Unexpected error:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -122,11 +184,11 @@ export function AppointmentForm({ doctorId, date, timeSlot, onSubmit, onBack }: 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="consultation">Consultation</SelectItem>
-                      <SelectItem value="follow-up">Follow-up</SelectItem>
-                      <SelectItem value="check-up">Regular Check-up</SelectItem>
-                      <SelectItem value="urgent">Urgent Care</SelectItem>
-                      <SelectItem value="specialist">Specialist Referral</SelectItem>
+                      <SelectItem value="Consultation">Consultation</SelectItem>
+                      <SelectItem value="Follow up">Follow-up</SelectItem>
+                      <SelectItem value="Check up">Regular Check-up</SelectItem>
+                      <SelectItem value="Urgent">Urgent Care</SelectItem>
+                      <SelectItem value="Specialist">Specialist Referral</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -249,4 +311,3 @@ export function AppointmentForm({ doctorId, date, timeSlot, onSubmit, onBack }: 
     </Card>
   )
 }
-

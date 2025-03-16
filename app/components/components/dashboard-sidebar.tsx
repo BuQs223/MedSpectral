@@ -52,18 +52,18 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
       notification: 0,
     },
     {
-      label: "doctor",
+      label: "Doctor",
       icon: CheckCircle2,
       href: "/dashboard?tab=status",
       active: pathname === "/dashboard" && currentTab === "status",
-      notification: 2,
+      notification: 0,
     },
     {
       label: "Medical Conditions",
       icon: FileText,
       href: "/dashboard?tab=conditions",
       active: pathname === "/dashboard" && currentTab === "conditions",
-      notification: 1,
+      notification: 0,
     },
     {
       label: "Medical Files",
@@ -77,23 +77,11 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
       icon: Calendar,
       href: "/dashboard/scheduling",
       active: pathname === "/dashboard/scheduling",
-      notification: 2,
-    },
-    {
-      label: "Messages",
-      icon: MessageSquare,
-      href: "/dashboard/messages",
-      active: pathname === "/dashboard/messages",
-      notification: 5,
-    },
-   
-    {
-      label: "Settings",
-      icon: Settings,
-      href: "/dashboard/settings",
-      active: pathname === "/dashboard/settings",
       notification: 0,
     },
+  
+   
+    
   ]
 
   return (

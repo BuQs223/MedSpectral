@@ -19,15 +19,16 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { supabase } from "@/utils/supabase"
 
 interface Appointment {
   id: string
-  patientId: string
-  patientName: string
-  doctorId: string
-  doctorName: string
-  date: string
-  time: string
+  patient_id: string
+  patient_name: string
+  doctor_id: string
+  doctor_name: string
+  appointment_date: string
+  start_time: string
   status: "scheduled" | "completed" | "cancelled" | "no-show"
   type: string
   reason: string
@@ -39,7 +40,7 @@ interface AppointmentListProps {
   userId?: string
 }
 
-export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentListProps) {
+export function AppointmentList({ isDoctor  }: AppointmentListProps) {
   const { toast } = useToast()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([])
@@ -56,99 +57,178 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false)
   const [appointmentNotes, setAppointmentNotes] = useState("")
-
-  // Fetch appointments
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      setIsLoading(true)
-      try {
-        // In a real app, this would be an API call
-        // For demo purposes, we'll generate some appointments
-        const mockAppointments: Appointment[] = [
-          {
-            id: "1",
-            patientId: "1",
-            patientName: "John Doe",
-            doctorId: "1",
-            doctorName: "Dr. Sarah Johnson",
-            date: "2023-07-15",
-            time: "10:00 AM",
-            status: "completed",
-            type: "Check-up",
-            reason: "Annual physical examination",
-            notes: "Patient is in good health. Blood pressure normal. Recommended regular exercise.",
-          },
-          {
-            id: "2",
-            patientId: "1",
-            patientName: "John Doe",
-            doctorId: "2",
-            doctorName: "Dr. Michael Chen",
-            date: format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"), // 3 days from now
-            time: "2:30 PM",
-            status: "scheduled",
-            type: "Consultation",
-            reason: "Persistent headaches",
-          },
-          {
-            id: "3",
-            patientId: "2",
-            patientName: "Emma Thompson",
-            doctorId: "1",
-            doctorName: "Dr. Sarah Johnson",
-            date: format(new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"), // Tomorrow
-            time: "9:15 AM",
-            status: "scheduled",
-            type: "Follow-up",
-            reason: "Review test results",
-          },
-          {
-            id: "4",
-            patientId: "1",
-            patientName: "John Doe",
-            doctorId: "3",
-            doctorName: "Dr. Emily Rodriguez",
-            date: "2023-06-20",
-            time: "11:00 AM",
-            status: "cancelled",
-            type: "Specialist Referral",
-            reason: "Skin rash evaluation",
-            notes: "Cancelled by patient due to scheduling conflict.",
-          },
-          {
-            id: "5",
-            patientId: "3",
-            patientName: "Michael Brown",
-            doctorId: "1",
-            doctorName: "Dr. Sarah Johnson",
-            date: format(new Date(), "yyyy-MM-dd"), // Today
-            time: "4:00 PM",
-            status: "scheduled",
-            type: "Urgent Care",
-            reason: "Severe back pain",
-          },
-        ]
-
-        // Filter appointments based on user role
-        const userAppointments = isDoctor
-          ? mockAppointments.filter((appointment) => appointment.doctorId === userId)
-          : mockAppointments.filter((appointment) => appointment.patientId === userId)
-
-        setAppointments(userAppointments)
-      } catch (error) {
-        console.error("Error fetching appointments:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load appointments. Please try again.",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
+  
+  // Fetch appointments from Supabase
+ // Fetch appointments from Supabase
+useEffect(() => {
+  const fetchAppointments = async () => {
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const userId = user?.id
+      
+      if (!userId) {
+        throw new Error("User not authenticated")
       }
-    }
+      
+      if (isDoctor) {
+        // For doctors, get their appointments with patient information
+        let { data: doctorData } = await supabase
+          .from('doctor')
+          .select('id')
+          .eq("user_id", userId)
 
-    fetchAppointments()
-  }, [isDoctor, userId, toast])
+        const doctorId = doctorData && doctorData.length > 0 ? doctorData[0].id : null;
+        
+        if (!doctorId) {
+          throw new Error("Doctor profile not found")
+        }
+        
+        // Get all appointments for this doctor
+        const { data: appointmentsData, error: appointmentsError } = await supabase
+          .from("appointment")
+          .select('*')
+          .eq("doctor_id", doctorId)
+        
+        if (appointmentsError) throw appointmentsError
+        
+        if (!appointmentsData || appointmentsData.length === 0) {
+          setAppointments([])
+          setIsLoading(false)
+          return
+        }
+        
+        // Extract all patient IDs from appointments
+        const patientIds = appointmentsData.map(appointment => appointment.patient_id)
+        
+        // Fetch patient information in a single query
+        const { data: patientsData, error: patientsError } = await supabase
+          .from('user')
+          .select('supabase_id, first_name, last_name')
+          .in('supabase_id', patientIds)
+        
+        if (patientsError) throw patientsError
+        
+        // Create a map of patient IDs to names
+        interface PatientMap {
+          [key: string]: string;
+        }
+        
+        const patientMap: PatientMap = {}
+        
+        if (patientsData) {
+          patientsData.forEach(patient => {
+            patientMap[patient.supabase_id] = `${patient.first_name} ${patient.last_name}`
+          })
+        }
+        
+        // Transform the data to match our Appointment interface
+        const formattedAppointments = appointmentsData.map(appointment => ({
+          id: appointment.id,
+          patient_id: appointment.patient_id,
+          patient_name: patientMap[appointment.patient_id] || "Unknown Patient",
+          doctor_id: appointment.doctor_id,
+          doctor_name: "Self", // Since this is the doctor's view
+          appointment_date: appointment.appointment_date,
+          start_time: appointment.start_time,
+          status: appointment.status,
+          type: appointment.type || appointment.appointment_type, // Handle different field names
+          reason: appointment.reason,
+          notes: appointment.notes
+        }))
+        
+        setAppointments(formattedAppointments)
+      } else {
+        // For patients, get their appointments with doctor information
+        const { data: appointmentsData, error: appointmentsError } = await supabase
+          .from("appointment")
+          .select('*')
+          .eq("patient_id", userId)
+        
+        if (appointmentsError) throw appointmentsError
+        
+        if (!appointmentsData || appointmentsData.length === 0) {
+          setAppointments([])
+          setIsLoading(false)
+          return
+        }
+        
+        // Extract all doctor IDs from appointments
+        const doctorIds = appointmentsData.map(appointment => appointment.doctor_id)
+        
+        // Fetch doctor information in a single query
+        const { data: doctorsData, error: doctorsError } = await supabase
+          .from('doctor')
+          .select('id, user_id')
+          .in('id', doctorIds)
+        
+        if (doctorsError) throw doctorsError
+        
+        // Get user information for doctors
+        const doctorUserIds = doctorsData?.map(doctor => doctor.user_id) || []
+        
+        const { data: doctorUsersData, error: doctorUsersError } = await supabase
+          .from('user')
+          .select('supabase_id, first_name, last_name')
+          .in('supabase_id', doctorUserIds)
+        
+        if (doctorUsersError) throw doctorUsersError
+        
+        // Create maps for quick lookups
+        interface DoctorMap {
+          [key: string]: string;
+        }
+        
+        const doctorUserMap: DoctorMap = {}
+        const doctorIdToUserIdMap: DoctorMap = {}
+        
+        if (doctorsData) {
+          doctorsData.forEach(doctor => {
+            doctorIdToUserIdMap[doctor.id] = doctor.user_id
+          })
+        }
+        
+        if (doctorUsersData) {
+          doctorUsersData.forEach(doctorUser => {
+            doctorUserMap[doctorUser.supabase_id] = `Dr. ${doctorUser.first_name} ${doctorUser.last_name}`
+          })
+        }
+        
+        // Transform the data to match our Appointment interface
+        const formattedAppointments = appointmentsData.map(appointment => {
+          const doctorUserId = doctorIdToUserIdMap[appointment.doctor_id]
+          
+          return {
+            id: appointment.id,
+            patient_id: appointment.patient_id,
+            patient_name: "Self", // Since this is the patient's view
+            doctor_id: appointment.doctor_id,
+            doctor_name: doctorUserMap[doctorUserId] || "Unknown Doctor",
+            appointment_date: appointment.appointment_date,
+            start_time: appointment.start_time,
+            status: appointment.status,
+            type: appointment.type || appointment.appointment_type, // Handle different field names
+            reason: appointment.reason,
+            notes: appointment.notes
+          }
+        })
+        
+        setAppointments(formattedAppointments)
+      }
+    } catch (error) {
+      console.error("Error fetching appointments:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load appointments. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
+  fetchAppointments()
+}, [isDoctor, toast, supabase])
 
   // Filter appointments based on tab and search term
   useEffect(() => {
@@ -158,17 +238,13 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
     if (activeTab === "upcoming") {
       filtered = filtered.filter(
         (appointment) =>
-          appointment.status === "scheduled" &&
-          (isAfter(parseISO(appointment.date), new Date()) || isToday(parseISO(appointment.date))),
+          appointment.status === "scheduled" ,
       )
     } else if (activeTab === "past") {
       filtered = filtered.filter(
         (appointment) =>
           appointment.status === "completed" ||
-          appointment.status === "no-show" ||
-          (appointment.status === "scheduled" &&
-            isBefore(parseISO(appointment.date), new Date()) &&
-            !isToday(parseISO(appointment.date))),
+          appointment.status === "no-show" ,
       )
     } else if (activeTab === "cancelled") {
       filtered = filtered.filter((appointment) => appointment.status === "cancelled")
@@ -179,8 +255,8 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(
         (appointment) =>
-          appointment.patientName.toLowerCase().includes(term) ||
-          appointment.doctorName.toLowerCase().includes(term) ||
+          appointment.patient_name.toLowerCase().includes(term) ||
+          appointment.doctor_name.toLowerCase().includes(term) ||
           appointment.reason.toLowerCase().includes(term) ||
           appointment.type.toLowerCase().includes(term),
       )
@@ -188,8 +264,8 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
 
     // Sort by date (newest first for past, oldest first for upcoming)
     filtered.sort((a, b) => {
-      const dateA = new Date(`${a.date} ${a.time}`).getTime()
-      const dateB = new Date(`${b.date} ${b.time}`).getTime()
+      const dateA = new Date(`${a.appointment_date} ${a.start_time}`).getTime()
+      const dateB = new Date(`${b.appointment_date} ${b.start_time}`).getTime()
       return activeTab === "past" ? dateB - dateA : dateA - dateB
     })
 
@@ -200,14 +276,17 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
     if (!selectedAppointment) return
 
     try {
-      // In a real app, this would be an API call
-      console.log("Cancelling appointment:", {
-        appointmentId: selectedAppointment.id,
-        reason: cancelReason,
-      })
+      const { error } = await supabase
+        .from("appointment")
+        .update({
+          status: "cancelled",
+          notes: cancelReason,
+        })
+        .eq("id", selectedAppointment.id)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (error) {
+        throw error
+      }
 
       // Update local state
       setAppointments((prev) =>
@@ -240,16 +319,22 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
     if (!selectedAppointment || !rescheduleDate || !rescheduleTime) return
 
     try {
-      // In a real app, this would be an API call
-      console.log("Rescheduling appointment:", {
-        appointmentId: selectedAppointment.id,
-        newDate: rescheduleDate,
-        newTime: rescheduleTime,
-        reason: rescheduleReason,
-      })
+      const { error } = await supabase
+        .from("appointment")
+        .update({
+          appointment_date: rescheduleDate,
+          start_time: rescheduleTime,
+          notes: rescheduleReason
+            ? `Rescheduled: ${rescheduleReason}${
+                selectedAppointment.notes ? `\n\nPrevious notes: ${selectedAppointment.notes}` : ""
+              }`
+            : selectedAppointment.notes,
+        })
+        .eq("id", selectedAppointment.id)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (error) {
+        throw error
+      }
 
       // Update local state
       setAppointments((prev) =>
@@ -259,7 +344,11 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                 ...appointment,
                 date: rescheduleDate,
                 time: rescheduleTime,
-                notes: rescheduleReason ? `Rescheduled: ${rescheduleReason}` : appointment.notes,
+                notes: rescheduleReason
+                  ? `Rescheduled: ${rescheduleReason}${
+                      appointment.notes ? `\n\nPrevious notes: ${appointment.notes}` : ""
+                    }`
+                  : appointment.notes,
               }
             : appointment,
         ),
@@ -289,14 +378,17 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
     if (!selectedAppointment) return
 
     try {
-      // In a real app, this would be an API call
-      console.log("Completing appointment:", {
-        appointmentId: selectedAppointment.id,
-        notes: appointmentNotes,
-      })
+      const { error } = await supabase
+        .from("appointment")
+        .update({
+          status: "completed",
+          notes: appointmentNotes,
+        })
+        .eq("id", selectedAppointment.id)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (error) {
+        throw error
+      }
 
       // Update local state
       setAppointments((prev) =>
@@ -412,7 +504,9 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                           </div>
                         </div>
                         <div>
-                          <h3 className="font-medium">{isDoctor ? appointment.patientName : appointment.doctorName}</h3>
+                          <h3 className="font-medium">
+                            {isDoctor ? appointment.patient_name : appointment.doctor_name}
+                          </h3>
                           <div className="flex flex-wrap gap-2 mt-1">
                             <Badge variant="secondary">{appointment.type}</Badge>
                             {getStatusBadge(appointment.status)}
@@ -420,7 +514,7 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                           <div className="flex items-center text-sm text-muted-foreground mt-1">
                             <Calendar className="h-3 w-3 mr-1" />
                             <span>
-                              {format(parseISO(appointment.date), "MMM d, yyyy")} at {appointment.time}
+                            {appointment.appointment_date}
                             </span>
                           </div>
                         </div>
@@ -506,7 +600,7 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
             <DialogTitle>Appointment Details</DialogTitle>
             <DialogDescription>
               {selectedAppointment &&
-                `${format(parseISO(selectedAppointment.date), "MMMM d, yyyy")} at ${selectedAppointment.time}`}
+                `${selectedAppointment.start_time}`}
             </DialogDescription>
           </DialogHeader>
 
@@ -514,13 +608,10 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Patient</p>
-                  <p>{selectedAppointment.patientName}</p>
+                <p className="text-sm font-medium text-gray-500">{isDoctor ? "Patient" : "Doctor"}</p>
+                  <p>{isDoctor ?selectedAppointment.patient_name : selectedAppointment.doctor_name}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Doctor</p>
-                  <p>{selectedAppointment.doctorName}</p>
-                </div>
+                
               </div>
 
               <div>
@@ -571,10 +662,10 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">
-                      {isDoctor ? selectedAppointment.patientName : selectedAppointment.doctorName}
+                      {isDoctor ? selectedAppointment.patient_name : selectedAppointment.doctor_name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {format(parseISO(selectedAppointment.date), "MMMM d, yyyy")} at {selectedAppointment.time}
+                    {selectedAppointment.start_time}
                     </p>
                   </div>
                   <Badge variant="secondary">{selectedAppointment.type}</Badge>
@@ -620,11 +711,10 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">
-                      {isDoctor ? selectedAppointment.patientName : selectedAppointment.doctorName}
+                      {isDoctor ? selectedAppointment.patient_name : selectedAppointment.doctor_name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Currently: {format(parseISO(selectedAppointment.date), "MMMM d, yyyy")} at{" "}
-                      {selectedAppointment.time}
+                    {selectedAppointment.start_time}
                     </p>
                   </div>
                   <Badge variant="secondary">{selectedAppointment.type}</Badge>
@@ -712,9 +802,9 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <p className="font-medium">{selectedAppointment.patientName}</p>
+                      <p className="font-medium">{selectedAppointment.patient_name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {format(parseISO(selectedAppointment.date), "MMMM d, yyyy")} at {selectedAppointment.time}
+                      {selectedAppointment.start_time}
                       </p>
                     </div>
                     <Badge variant="secondary">{selectedAppointment.type}</Badge>
@@ -750,4 +840,3 @@ export function AppointmentList({ isDoctor = false, userId = "1" }: AppointmentL
     </div>
   )
 }
-
