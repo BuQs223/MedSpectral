@@ -231,7 +231,6 @@ export function ConnectionStatus() {
                             </div>
                           </div>
                         </div>
-                        {getActionButtons(connection)}
                       </div>
                     ))}
                   </div>
@@ -264,7 +263,6 @@ export function ConnectionStatus() {
                             </div>
                           </div>
                         </div>
-                        {getActionButtons(connection)}
                       </div>
                     ))}
                   </div>
@@ -303,7 +301,6 @@ export function ConnectionStatus() {
                             <p>{connection.rejection_reason}</p>
                           </div>
                         )}
-                        {getActionButtons(connection)}
                       </div>
                     ))}
                   </div>

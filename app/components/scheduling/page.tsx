@@ -12,7 +12,6 @@ export default function SchedulingPage() {
         <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="book">Book Appointment</TabsTrigger>
           <TabsTrigger value="manage">My Appointments</TabsTrigger>
-          <TabsTrigger value="availability">Manage Availability</TabsTrigger>
         </TabsList>
 
         <TabsContent value="book" className="mt-0">

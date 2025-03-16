@@ -72,7 +72,7 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
   return (
     <div className={cn("relative flex flex-col", className)} {...props}>
       <div className="flex h-14 items-center px-4 border-b border-gray-200 justify-between">
-        <Link href="/doctor" className={cn("flex items-center", collapsed ? "justify-center" : "")}>
+        <Link prefetch={true} href="/doctor" className={cn("flex items-center", collapsed ? "justify-center" : "")}>
           {!collapsed ? (
             <>
               <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center text-white mr-2">
@@ -105,6 +105,7 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
                   <Tooltip key={route.href} delayDuration={collapsed ? 100 : 1000000}>
                     <TooltipTrigger asChild>
                       <Link
+                      prefetch={true}
                         href={route.href}
                         className={cn(
                           "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -149,7 +150,7 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
                 )}
                 asChild
               >
-                <Link href="/login">
+                <Link href="/login" prefetch={true}>
                   <LogOut className={cn("h-5 w-5", collapsed ? "" : "mr-2")} />
                   {!collapsed && "Log out"}
                 </Link>

@@ -209,7 +209,7 @@ export function DashboardOverview() {
           </CardContent>
           <CardFooter className="p-2">
             <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/doctor?tab=requests">
+              <Link prefetch={true} href="/doctor?tab=requests">
                 Review Requests
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
@@ -262,7 +262,7 @@ export function DashboardOverview() {
           </CardContent>
           <CardFooter className="pt-0">
             <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/doctor/scheduling">
+              <Link prefetch={true} href="/doctor/scheduling">
                 View All Appointments
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Link>

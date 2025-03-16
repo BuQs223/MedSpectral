@@ -170,39 +170,7 @@ export function PatientOverview({ patient }: PatientOverviewProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Insurance Information</CardTitle>
-            <CardDescription>Patient coverage details</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <Shield className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Provider</p>
-                  <p>{patient.insurance.provider}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <Shield className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Policy Number</p>
-                  <p>{patient.insurance.policyNumber}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <CalendarClock className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Expiry Date</p>
-                  <p>{new Date(patient.insurance.expiryDate).toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
 
       {/* Middle column - Medical Information */}
@@ -397,21 +365,7 @@ export function PatientOverview({ patient }: PatientOverviewProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Upcoming Appointments</CardTitle>
-            <CardDescription>Scheduled future visits</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 border rounded-md border-dashed flex items-center justify-center">
-              <div className="text-center">
-                <CalendarClock className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">No upcoming appointments</p>
-                <button className="text-primary text-sm mt-2">Schedule appointment</button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   )

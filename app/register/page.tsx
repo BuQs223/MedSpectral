@@ -883,7 +883,7 @@ export default function SignupPage() {
 
                 <p className="text-center text-sm text-slate-600 dark:text-slate-400 mt-4">
                   Already have an account?{" "}
-                  <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                  <Link prefetch={true} href="/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
                     Sign in
                   </Link>
                 </p>

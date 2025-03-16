@@ -24,7 +24,7 @@ export function PatientDetails({ patient }: PatientDetailsProps) {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/doctor?tab=patients">
+            <Link  prefetch={true} href="/doctor?tab=patients">
               <Button variant="ghost" size="icon" className="hover:bg-gray-100">
                 <ChevronLeft className="h-5 w-5" />
                 <span className="sr-only">Back to patients</span>
@@ -37,24 +37,7 @@ export function PatientDetails({ patient }: PatientDetailsProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="hidden md:inline-flex">
-              <Printer className="mr-2 h-4 w-4" />
-              Print
-            </Button>
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Calendar className="mr-2 h-4 w-4" />
-              Schedule
-            </Button>
-            <Button variant="outline" size="sm">
-              <MessageSquare className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Message</span>
-            </Button>
-            <Button>
-              <Bell className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Notify</span>
-            </Button>
-          </div>
+          
         </div>
       </div>
 

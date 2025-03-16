@@ -286,6 +286,7 @@ export function PatientManagement() {
                             </Avatar>
                             <div>
                               <Link
+                              prefetch={true}
                                 href={`/doctor/patients/${patient.userId}`}
                                 className="font-medium hover:underline text-primary"
                               >
@@ -324,7 +325,7 @@ export function PatientManagement() {
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
-                              <Link href={`/doctor/patients/${patient.userId}`}>
+                              <Link prefetch={true} href={`/doctor/patients/${patient.userId}`}>
                                 <FileText className="h-4 w-4 sm:mr-2" />
                                 <span className="hidden sm:inline">View</span>
                               </Link>
@@ -340,7 +341,7 @@ export function PatientManagement() {
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/doctor/patients/${patient.userId}`}>
+                                  <Link prefetch={true} href={`/doctor/patients/${patient.userId}`}>
                                     <FileText className="mr-2 h-4 w-4" />
                                     <span>View Details</span>
                                   </Link>
@@ -350,7 +351,7 @@ export function PatientManagement() {
                                   <span>Schedule Appointment</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/doctor/patients/${patient.userId}?tab=diagnosis`}>
+                                  <Link prefetch={true} href={`/doctor/patients/${patient.userId}?tab=diagnosis`}>
                                     <ClipboardList className="mr-2 h-4 w-4" />
                                     <span>Add Diagnosis</span>
                                   </Link>

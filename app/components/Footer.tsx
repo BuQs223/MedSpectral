@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2" prefetch={true}>
               <span className="text-xl font-bold text-blue-600 dark:text-blue-400">MedSpectra</span>
             </Link>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs">
@@ -16,6 +16,7 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <Link
+              prefetch={true}
                 href="#"
                 className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
@@ -23,6 +24,7 @@ export default function Footer() {
                 <Facebook className="h-5 w-5" />
               </Link>
               <Link
+              prefetch={true}
                 href="#"
                 className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
@@ -30,6 +32,7 @@ export default function Footer() {
                 <Twitter className="h-5 w-5" />
               </Link>
               <Link
+              prefetch={true}
                 href="#"
                 className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
@@ -37,11 +40,13 @@ export default function Footer() {
                 <Instagram className="h-5 w-5" />
               </Link>
               <Link
+              prefetch={true}
                 href="#"
                 className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
                 <span className="sr-only">LinkedIn</span>
                 <Linkedin className="h-5 w-5" />
+                prefetch={true}
               </Link>
             </div>
           </div>
@@ -58,6 +63,7 @@ export default function Footer() {
               ].map((link) => (
                 <li key={link.label}>
                   <Link
+                  prefetch={true}
                     href={link.href}
                     className="text-sm text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
                   >

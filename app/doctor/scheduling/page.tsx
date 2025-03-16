@@ -8,10 +8,7 @@ export default function DoctorSchedulingPage() {
       <h1 className="text-3xl font-bold mb-8">Appointment Management</h1>
 
       <Tabs defaultValue="appointments" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="appointments">Patient Appointments</TabsTrigger>
-          <TabsTrigger value="availability">Manage Availability</TabsTrigger>
-        </TabsList>
+        
 
         <TabsContent value="appointments" className="mt-0">
           <AppointmentList isDoctor={true} />

@@ -188,7 +188,7 @@ export default function AboutPage() {
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
               Get Started
             </Button>
-            <Link href="/contact" passHref>
+            <Link href="/contact" passHref prefetch={true}>
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
               Contact Us
             </Button>

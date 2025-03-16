@@ -87,7 +87,7 @@ export default function LoginPage() {
     <div className="bg-background flex flex-col items-center justify-center p-4 ">
       
       <div className="w-full max-w-md">
-        <Link href="/" prefetch={true} className="inline-flex items-center text-primary mb-6 hover:underline" >
+        <Link  href="/" prefetch={true} className="inline-flex items-center text-primary mb-6 hover:underline" >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>

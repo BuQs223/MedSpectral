@@ -40,6 +40,7 @@ export default function FullScreenMenu({ isOpen, onClose }: FullScreenMenuProps)
                 transition={{ delay: index * 0.1 }}
               >
                 <Link
+                prefetch={true}
                   href={`#${item.toLowerCase()}`}
                   className="block text-4xl font-bold text-gray-900 mb-6 hover:text-gray-600 transition-colors"
                   onClick={onClose}

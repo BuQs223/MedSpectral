@@ -87,7 +87,7 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
   return (
     <div className={cn("relative flex flex-col", className)} {...props}>
       <div className="flex h-14 items-center px-4 border-b border-gray-200 justify-between">
-        <Link href="/" className={cn("flex items-center", collapsed ? "justify-center" : "")}>
+        <Link prefetch={true} href="/" className={cn("flex items-center", collapsed ? "justify-center" : "")}>
         <h1 className="text-xl font-bold text-primary">MedSpectra</h1>
         </Link>
         <Button variant="ghost" size="icon" onClick={onToggle} className="hidden lg:flex">
@@ -109,6 +109,7 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
                   <Tooltip key={route.href} delayDuration={collapsed ? 100 : 1000000}>
                     <TooltipTrigger asChild>
                       <Link
+                      prefetch={true}
                         href={route.href}
                         className={cn(
                           "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -153,7 +154,7 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
                 )}
                 asChild
               >
-                <Link href="/login">
+                <Link prefetch={true} href="/login">
                   <LogOut className={cn("h-5 w-5", collapsed ? "" : "mr-2")} />
                   {!collapsed && "Log out"}
                 </Link>

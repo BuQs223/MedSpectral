@@ -494,7 +494,7 @@ export default function ServicesPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.4 }}
           >
-            <Link href="/signup" passHref>
+            <Link prefetch={true} href="/signup" passHref>
               <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50 group">
                 Get Started
                 <motion.span className="ml-2" initial={{ x: 0 }} whileHover={{ x: 5 }}>
@@ -502,7 +502,7 @@ export default function ServicesPage() {
                 </motion.span>
               </Button>
             </Link>
-            <Link href="/contact" passHref>
+            <Link prefetch={true} href="/contact" passHref>
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50 group">
                 Schedule a demo
               </Button>

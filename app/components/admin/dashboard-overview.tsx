@@ -108,7 +108,7 @@ export function DashboardOverview() {
           </CardContent>
           <CardFooter className="p-2">
             <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/admin?tab=doctors">
+              <Link prefetch={true} href="/admin?tab=doctors">
                 Review Applications
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
@@ -193,7 +193,7 @@ export function DashboardOverview() {
 
             <div className="pt-4">
               <Button variant="outline" className="w-full border-gray-200" asChild>
-                <Link href="/admin/analytics">
+                <Link prefetch={true} href="/admin/analytics">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   View Detailed Analytics
                 </Link>
@@ -224,7 +224,7 @@ export function DashboardOverview() {
           </CardContent>
           <CardFooter className="pt-0">
             <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/admin/activity">
+              <Link prefetch={true} href="/admin/activity">
                 View All Activity
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
