@@ -15,6 +15,10 @@ import {
   Thermometer,
   HeartPulse,
   TreesIcon as Lungs,
+  Scale,
+  Weight,
+  Cigarette,
+  Wine,
 } from "lucide-react"
 import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react"
 
@@ -91,6 +95,41 @@ export function PatientOverview({ patient }: PatientOverviewProps) {
                 <div>
                   <p className="text-sm font-medium text-gray-500">Address</p>
                   <p>{patient.address}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Scale className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">BMI</p>
+                  <p>{(patient.bw/(patient.height*patient.height)).toFixed(2)}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Weight className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Weight</p>
+                  <p>{patient.bw}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <User className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Height</p>
+                  <p>{patient.height}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Cigarette className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Smoker</p>
+                  <p>{patient.smoker}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Wine className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Drinker</p>
+                  <p>{patient.drinker}</p>
                 </div>
               </div>
             </div>

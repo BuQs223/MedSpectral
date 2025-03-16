@@ -75,8 +75,8 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
     {
       label: "Appointments",
       icon: Calendar,
-      href: "/dashboard/appointments",
-      active: pathname === "/dashboard/appointments",
+      href: "/dashboard/scheduling",
+      active: pathname === "/dashboard/scheduling",
       notification: 2,
     },
     {
@@ -100,22 +100,7 @@ export function DashboardSidebar({ className, collapsed = false, onToggle, ...pr
     <div className={cn("relative flex flex-col", className)} {...props}>
       <div className="flex h-14 items-center px-4 border-b border-gray-200 justify-between">
         <Link href="/" className={cn("flex items-center", collapsed ? "justify-center" : "")}>
-          {!collapsed ? (
-            <>
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/creative-SW6QDQbcVuwPgb6a2CYtYmRbsJa4k1.png"
-                alt="MedSpectra Logo"
-                className="h-8 w-auto mr-2"
-              />
-              <h1 className="text-xl font-bold text-primary">MedSpectra</h1>
-            </>
-          ) : (
-            <img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/creative-SW6QDQbcVuwPgb6a2CYtYmRbsJa4k1.png"
-              alt="MedSpectra Logo"
-              className="h-8 w-auto"
-            />
-          )}
+        <h1 className="text-xl font-bold text-primary">MedSpectra</h1>
         </Link>
         <Button variant="ghost" size="icon" onClick={onToggle} className="hidden lg:flex">
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}

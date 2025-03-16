@@ -195,6 +195,10 @@ async function getPatient(id: string) {
         vaccinations: patientData.vaccinations
             ? patientData.vaccinations.split(',').map((item: string) => item.trim())
             : [],
+        bw: patientData.bw,
+        height : patientData.height,
+        drinker: patientData.drinker,
+        smoker: patientData.smoker,
     }
 }
 

@@ -110,47 +110,16 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-medium text-slate-900 dark:text-white">Address</h3>
                       <p className="text-slate-600 dark:text-slate-300">
-                        123 Healthcare Ave
+                        Rodnei nr.1
                         <br />
-                        Suite 200
-                        <br />
-                        San Francisco, CA 94107
+                        Timisoara
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Support Options</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <MessageSquare className="h-5 w-5 text-blue-500 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-slate-900 dark:text-white">Live Chat</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">Available 9am-5pm PT, Mon-Fri</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <Calendar className="h-5 w-5 text-blue-500 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-slate-900 dark:text-white">Schedule a Demo</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">See our platform in action</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <HelpCircle className="h-5 w-5 text-blue-500 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-slate-900 dark:text-white">Help Center</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">Browse our knowledge base</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+             
             </div>
 
             {/* Contact Form */}

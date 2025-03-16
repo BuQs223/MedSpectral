@@ -220,7 +220,7 @@ export function DashboardOverview() {
           </CardContent>
           <CardFooter className="pt-0">
             <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
-              <Link href="/doctor/appointments">
+              <Link href="/doctor/scheduling">
                 View All Appointments
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Link>

@@ -60,8 +60,8 @@ export function DoctorSidebar({ className, collapsed = false, onToggle, ...props
     {
       label: "Appointments",
       icon: Calendar,
-      href: "/doctor/appointments",
-      active: pathname === "/doctor/appointments",
+      href: "/doctor/scheduling",
+      active: pathname === "/doctor/scheduling",
       notification: 3,
     },
     {

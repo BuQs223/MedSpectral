@@ -197,7 +197,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <Shield className="h-10 w-10 text-green-500" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">HIPAA Compliant</p>
+                    <p className="font-bold text-slate-900 dark:text-white">GDPR Compliant</p>
                     <p className="text-sm text-slate-600 dark:text-slate-300">Your data is secure</p>
                   </div>
                 </div>

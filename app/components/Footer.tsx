@@ -55,8 +55,6 @@ export default function Footer() {
                 { href: "/about", label: "About Us" },
                 { href: "/services", label: "Services" },
                 { href: "#", label: "Careers" },
-                { href: "#", label: "Blog" },
-                { href: "#", label: "Press" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -76,11 +74,9 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               {[
-                { href: "#", label: "Help Center" },
-                { href: "#", label: "Documentation" },
                 { href: "#", label: "Privacy Policy" },
                 { href: "#", label: "Terms of Service" },
-                { href: "#", label: "HIPAA Compliance" },
+                { href: "#", label: "GDPR Compliance" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -110,11 +106,10 @@ export default function Footer() {
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
                 <span className="text-sm text-slate-600 dark:text-slate-400">
-                  123 Healthcare Ave
+                  Rodnei nr.1
                   <br />
-                  Suite 200
-                  <br />
-                  San Francisco, CA 94107
+                  
+                 Timisoara
                 </span>
               </li>
             </ul>
