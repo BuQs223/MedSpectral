@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import AdminDashboard from "../components/admin/AdminDashboard"
@@ -76,7 +76,9 @@ export default function Dashboard() {
     
     // Render the appropriate dashboard based on the user's role
     if (userData.role === "doctor") {
-      return <DoctorDashboard />
+      return <Suspense fallback={<div>Loading...</div>}>
+        <DoctorDashboard/>
+      </Suspense>
     } else {
       // Default to PatientDashboard for regular users
       return <PatientDashboard />

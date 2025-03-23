@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { DoctorSidebar } from "./doctor-sidebar"
 import { cn } from "@/lib/utils"
 
@@ -36,7 +36,8 @@ export function DoctorShell({ children }: DoctorShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <div className="flex flex-1">
-        <DoctorSidebar
+      <Suspense fallback={<div>Loading...</div>}>
+      <DoctorSidebar
           className={cn(
             "fixed z-30 h-screen transition-all duration-300 ease-in-out border-r border-gray-200 bg-white",
             sidebarCollapsed ? "w-[70px]" : "w-[250px]",
@@ -44,6 +45,7 @@ export function DoctorShell({ children }: DoctorShellProps) {
           collapsed={sidebarCollapsed}
           onToggle={toggleSidebar}
         />
+        </Suspense>
         <main
           className={cn(
             "flex-1 transition-all duration-300 ease-in-out bg-gray-50",

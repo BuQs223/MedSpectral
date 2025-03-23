@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { DoctorShell } from "./doctor-shell"
 import { DashboardOverview } from "./dashboard-overview"
 import { PatientManagement } from "./patient-management"
@@ -75,7 +75,9 @@ export default function DoctorDashboard() {
           
         </TabsList>
         <TabsContent value="overview" className="mt-6">
+        <Suspense fallback={<div>Loading...</div>}>
           <DashboardOverview />
+        </Suspense>
         </TabsContent>
         <TabsContent value="patients" className="mt-6">
           <PatientManagement />

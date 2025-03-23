@@ -78,6 +78,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    // Update this line to be compatible with Tailwind CSS v4
+    require("tailwindcss-animate")
+  ],
 }
-
