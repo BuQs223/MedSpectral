@@ -243,7 +243,7 @@ export function FileUpload() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Upload Medical Files</CardTitle>
+          <CardTitle>Upload Medical Filesss</CardTitle>
           <CardDescription>
             Upload your medical documents, test results, or imaging files. Supported formats: PDF, JPG, PNG, DOCX, ZIP.
           </CardDescription>
