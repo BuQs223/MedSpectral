@@ -108,7 +108,7 @@ export function FileUpload() {
       }
     } catch (err) {
       console.error("Error fetching files:", err);
-      setError("Failed to load files. Please try again later.");
+      setError("Failed to load files. Please try again later :)");
     } finally {
       setLoading(false);
     }
