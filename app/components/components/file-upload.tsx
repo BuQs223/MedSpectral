@@ -278,7 +278,7 @@ export function FileUpload() {
               disabled={uploading || !selectedFile}
             >
               <Upload className="mr-2 h-4 w-4" />
-              {uploading ? "Uploading..." : "Upload File"}
+              {uploading ? "Uploading.." : "Upload File"}
             </Button>
             {uploading && (
               <div className="space-y-2">
